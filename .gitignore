@@ -1,0 +1,71 @@
+# ─────────────────────────────────────────────────────────────────
+# PENTING: Jangan pernah commit secret, key, atau password!
+# ─────────────────────────────────────────────────────────────────
+
+# Environment variables and local secrets
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Testing & Coverage
+.pytest_cache/
+.coverage
+htmlcov/
+*.xml
+
+# Application generated files (jangan commit)
+uploads/
+temp/
+tmp/
+*.tmp
+
+# Hasil benchmark (dihasilkan saat runtime)
+results/benchmark/*.json
+results/benchmark/*.csv
+results/benchmark/*.xlsx
+results/charts/
+
+# Encrypted files (jangan commit)
+*.enc
+
+# Key dan certificate files (JANGAN PERNAH COMMIT)
+*.key
+*.pem
+*.crt
+*.p12
+secrets/
+
+# IDE
+.vscode/
+.idea/
+*.suo
+*.user
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Distribution / build
+dist/
+build/
+*.egg-info/
+
+# Local logs and verification output
+*.log
+verification-results/

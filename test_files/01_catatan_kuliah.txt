@@ -1,0 +1,9 @@
+Catatan Kuliah: Keamanan Informasi & Kriptografi
+Topik: Algoritma Kriptografi Modern (AES-256-GCM & ChaCha20-Poly1305)
+
+1. Confidentiality: Melindungi kerahasiaan data menggunakan cipher simetris 256-bit.
+2. Integrity: Menjamin data tidak dimodifikasi menggunakan Message Authentication Code (MAC).
+3. Authenticity: Memastikan sumber dan keabsahan ciphertext sebelum didekripsi.
+4. Key Derivation: Menggunakan PBKDF2-HMAC-SHA256 dengan salt acak 32 bytes untuk mitigasi brute force.
+
+Kerahasiaan tugas dan data akademik terjaga dengan aman.

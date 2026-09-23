@@ -1,0 +1,302 @@
+{% extends "base.html" %}
+
+{% block title %}Enkripsi & Dekripsi File — Brankas File Tugas Kuliah{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title" id="page-main-heading">Enkripsi &amp; Dekripsi File</h1>
+    <p class="page-subtitle">Lindungi atau pulihkan berkas tugas kuliah dengan enkripsi modern berotentikasi.</p>
+</div>
+
+<!-- ═══════════════════════ SEGMENTED TAB SWITCHER ═══════════════════════ -->
+<div class="segmented-control" role="tablist" aria-label="Mode Operasi File">
+    <button type="button" class="segmented-btn {% if initial_mode != 'decrypt' %}active{% endif %}"
+            id="tab-btn-encrypt" role="tab"
+            aria-selected="{% if initial_mode != 'decrypt' %}true{% else %}false{% endif %}"
+            aria-controls="panel-encrypt"
+            onclick="switchFileMode('encrypt')">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect width="18" height="11" x="3" y="11" rx="2" ry="2"/>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+        </svg>
+        <span>Enkripsi File</span>
+    </button>
+    <button type="button" class="segmented-btn {% if initial_mode == 'decrypt' %}active{% endif %}"
+            id="tab-btn-decrypt" role="tab"
+            aria-selected="{% if initial_mode == 'decrypt' %}true{% else %}false{% endif %}"
+            aria-controls="panel-decrypt"
+            onclick="switchFileMode('decrypt')">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect width="18" height="11" x="3" y="11" rx="2" ry="2"/>
+            <path d="M7 11V7a5 5 0 0 1 9.9-1"/>
+        </svg>
+        <span>Dekripsi File</span>
+    </button>
+</div>
+
+<!-- ═══════════════════════ PANEL ENKRIPSI FILE ═══════════════════════ -->
+<div class="tab-panel {% if initial_mode != 'decrypt' %}active{% endif %}" id="panel-encrypt" role="tabpanel" aria-labelledby="tab-btn-encrypt">
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect width="18" height="11" x="3" y="11" rx="2" ry="2"/>
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                </svg>
+                <span>Enkripsi File</span>
+            </h2>
+            <span class="nav-badge">Output: .enc</span>
+        </div>
+
+        <div class="card-body">
+            <form id="file-encrypt-form" novalidate>
+
+                <!-- Drag & Drop Zone -->
+                <div class="form-group">
+                    <label class="form-label">Pilih File <span class="required">*</span></label>
+                    <div class="dropzone" id="enc-dropzone" role="region" aria-label="Area drag and drop file">
+                        <div class="dropzone-icon">
+                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                <polyline points="17 8 12 3 7 8"/>
+                                <line x1="12" y1="3" x2="12" y2="15"/>
+                            </svg>
+                        </div>
+                        <p class="dropzone-title">Tarik file ke sini atau pilih dari komputer</p>
+                        <p class="dropzone-desc">Mendukung PDF, Word, dokumen, gambar, dan arsip hingga 64 MB</p>
+                        <label for="enc-file-input" class="btn btn-secondary btn-sm">
+                            Pilih File
+                        </label>
+                        <input type="file" id="enc-file-input" name="file" class="file-input-hidden">
+                    </div>
+
+                    <!-- Selected File Preview Summary -->
+                    <div class="file-summary-card" id="enc-file-info" style="display:none">
+                        <div class="file-summary-left">
+                            <div class="file-type-icon" id="enc-file-icon">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                                    <polyline points="14 2 14 8 20 8"/>
+                                </svg>
+                            </div>
+                            <div class="file-summary-info">
+                                <span class="file-summary-name" id="enc-file-name"></span>
+                                <span class="file-summary-size" id="enc-file-size"></span>
+                            </div>
+                        </div>
+                        <button type="button" class="btn btn-secondary btn-sm" onclick="clearEncFile()">
+                            Ganti File
+                        </button>
+                    </div>
+                </div>
+
+                <div class="form-grid-2col">
+                    <!-- Algorithm Selection -->
+                    <div class="form-group">
+                        <label for="enc-file-algorithm" class="form-label">Algoritma Enkripsi</label>
+                        <select id="enc-file-algorithm" name="algorithm" class="form-select">
+                            <option value="AES-256-GCM" selected>AES-256-GCM (Rekomendasi NIST)</option>
+                            <option value="ChaCha20-Poly1305">ChaCha20-Poly1305 (RFC 8439)</option>
+                        </select>
+                        <div class="form-hint">Keduanya menggunakan kunci 256-bit dan menghasilkan tag autentikasi 16-byte.</div>
+                    </div>
+
+                    <!-- Password Field -->
+                    <div class="form-group">
+                        <label for="enc-file-password" class="form-label">Password <span class="required">*</span></label>
+                        <div class="input-password-wrapper">
+                            <input
+                                type="password"
+                                id="enc-file-password"
+                                name="password"
+                                class="form-input"
+                                placeholder="Masukkan password enkripsi..."
+                                required
+                                autocomplete="off"
+                            >
+                            <button type="button" class="toggle-pw-btn"
+                                    onclick="togglePassword('enc-file-password', this)"
+                                    aria-label="Tampilkan atau sembunyikan password">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/>
+                                    <circle cx="12" cy="12" r="3"/>
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="form-hint">Password digunakan untuk membentuk encryption key dan tidak disimpan oleh aplikasi.</div>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-primary" id="enc-file-submit">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect width="18" height="11" x="3" y="11" rx="2" ry="2"/>
+                            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                        </svg>
+                        <span>Enkripsi File</span>
+                    </button>
+                </div>
+
+                <!-- Status & Inline Notification -->
+                <div id="enc-file-status" class="alert" style="display:none" role="alert"></div>
+
+                <!-- Result Box -->
+                <div class="result-box" id="enc-file-result" style="display:none" aria-live="polite">
+                    <div class="result-box-header">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="20 6 9 17 4 12"/>
+                        </svg>
+                        <span>Enkripsi Berhasil</span>
+                    </div>
+                    <table class="property-table mb-4">
+                        <tbody>
+                            <tr><td>Nama File Output</td><td id="enc-res-filename">—</td></tr>
+                            <tr><td>Algoritma</td><td id="enc-res-algorithm">—</td></tr>
+                            <tr><td>KDF (Key Derivation)</td><td>PBKDF2-HMAC-SHA256 (600.000 iterasi)</td></tr>
+                            <tr><td>Ukuran File Output</td><td id="enc-res-filesize">—</td></tr>
+                        </tbody>
+                    </table>
+                    <button type="button" class="btn btn-primary btn-sm" id="enc-download-btn">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                            <polyline points="7 10 12 15 17 10"/>
+                            <line x1="12" y1="15" x2="12" y2="3"/>
+                        </svg>
+                        <span>Download File .enc</span>
+                    </button>
+                </div>
+
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- ═══════════════════════ PANEL DEKRIPSI FILE ═══════════════════════ -->
+<div class="tab-panel {% if initial_mode == 'decrypt' %}active{% endif %}" id="panel-decrypt" role="tabpanel" aria-labelledby="tab-btn-decrypt">
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect width="18" height="11" x="3" y="11" rx="2" ry="2"/>
+                    <path d="M7 11V7a5 5 0 0 1 9.9-1"/>
+                </svg>
+                <span>Dekripsi File</span>
+            </h2>
+            <span class="nav-badge">Input: .enc</span>
+        </div>
+
+        <div class="card-body">
+            <form id="file-decrypt-form" novalidate>
+
+                <!-- Dropzone for .enc -->
+                <div class="form-group">
+                    <label class="form-label">Pilih File .enc <span class="required">*</span></label>
+                    <div class="dropzone" id="dec-dropzone" role="region" aria-label="Area drag and drop file terenkripsi">
+                        <div class="dropzone-icon">
+                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                                <rect width="18" height="11" x="3" y="11" rx="2" ry="2"/>
+                                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                            </svg>
+                        </div>
+                        <p class="dropzone-title">Tarik file .enc ke sini atau pilih dari komputer</p>
+                        <p class="dropzone-desc">Hanya menerima berkas berformat .enc dari Brankas</p>
+                        <label for="dec-file-input" class="btn btn-secondary btn-sm">
+                            Pilih File .enc
+                        </label>
+                        <input type="file" id="dec-file-input" name="file" accept=".enc" class="file-input-hidden">
+                    </div>
+
+                    <!-- Selected .enc File Preview Summary -->
+                    <div class="file-summary-card" id="dec-file-info" style="display:none">
+                        <div class="file-summary-left">
+                            <div class="file-type-icon">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect width="18" height="11" x="3" y="11" rx="2" ry="2"/>
+                                    <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                                </svg>
+                            </div>
+                            <div class="file-summary-info">
+                                <span class="file-summary-name" id="dec-file-name"></span>
+                                <span class="file-summary-size" id="dec-file-size"></span>
+                            </div>
+                        </div>
+                        <button type="button" class="btn btn-secondary btn-sm" onclick="clearDecFile()">
+                            Ganti File
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Password Field -->
+                <div class="form-group">
+                    <label for="dec-file-password" class="form-label">Password Dekripsi <span class="required">*</span></label>
+                    <div class="input-password-wrapper">
+                        <input
+                            type="password"
+                            id="dec-file-password"
+                            name="password"
+                            class="form-input"
+                            placeholder="Password yang digunakan saat enkripsi..."
+                            required
+                            autocomplete="off"
+                        >
+                        <button type="button" class="toggle-pw-btn"
+                                onclick="togglePassword('dec-file-password', this)"
+                                aria-label="Tampilkan atau sembunyikan password">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/>
+                                <circle cx="12" cy="12" r="3"/>
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="form-hint">Masukkan password persis seperti saat mengenkripsi file ini.</div>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-primary" id="dec-file-submit">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect width="18" height="11" x="3" y="11" rx="2" ry="2"/>
+                            <path d="M7 11V7a5 5 0 0 1 9.9-1"/>
+                        </svg>
+                        <span>Dekripsi File</span>
+                    </button>
+                </div>
+
+                <!-- Status & Inline Notification -->
+                <div id="dec-file-status" class="alert" style="display:none" role="alert"></div>
+
+                <!-- Result Box -->
+                <div class="result-box" id="dec-file-result" style="display:none" aria-live="polite">
+                    <div class="result-box-header">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="20 6 9 17 4 12"/>
+                        </svg>
+                        <span>Dekripsi Berhasil</span>
+                    </div>
+                    <table class="property-table mb-4">
+                        <tbody>
+                            <tr><td>Nama File Asli</td><td id="dec-res-filename">—</td></tr>
+                            <tr><td>Integritas</td><td>Valid (Autentikasi AEAD Cocok)</td></tr>
+                        </tbody>
+                    </table>
+                    <button type="button" class="btn btn-primary btn-sm" id="dec-download-btn">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                            <polyline points="7 10 12 15 17 10"/>
+                            <line x1="12" y1="15" x2="12" y2="3"/>
+                        </svg>
+                        <span>Download File Asli</span>
+                    </button>
+                </div>
+
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/file.js') }}"></script>
+{% endblock %}

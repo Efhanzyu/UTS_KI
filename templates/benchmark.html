@@ -1,0 +1,211 @@
+{% extends "base.html" %}
+
+{% block title %}Benchmark Kriptografi — Brankas File Tugas Kuliah{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">Benchmark Kriptografi</h1>
+    <p class="page-subtitle">Perbandingan performa algoritma enkripsi AES-256-GCM dan ChaCha20-Poly1305 pada ukuran data yang berbeda.</p>
+</div>
+
+<!-- ═══════════════════════ KONTROL PENGUJIAN ═══════════════════════ -->
+<div class="card">
+    <div class="card-header">
+        <h2 class="card-title">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="3"/>
+                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+            </svg>
+            <span>Parameter Pengujian</span>
+        </h2>
+    </div>
+
+    <div class="card-body">
+        <div class="benchmark-ctrl-grid">
+            <div class="form-group mb-0">
+                <label class="form-label">Ukuran Data Uji</label>
+                <div class="checkbox-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="size-1kb" value="1" checked>
+                        <span>1 KB</span>
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="size-1mb" value="1024" checked>
+                        <span>1 MB</span>
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="size-10mb" value="10240" checked>
+                        <span>10 MB</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="form-group mb-0">
+                <label for="bench-runs" class="form-label">
+                    Pengulangan: <strong id="runs-display">10</strong> kali
+                </label>
+                <div class="range-ctrl">
+                    <input type="range" id="bench-runs" min="1" max="100" value="10"
+                           class="range-input"
+                           oninput="document.getElementById('runs-display').textContent = this.value">
+                </div>
+            </div>
+
+            <div class="form-group mb-0">
+                <button type="button" class="btn btn-primary" id="run-benchmark-btn" onclick="runBenchmark()">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polygon points="5 3 19 12 5 21 5 3"/>
+                    </svg>
+                    <span>Jalankan Benchmark</span>
+                </button>
+            </div>
+        </div>
+
+        <div id="bench-status" class="alert" style="display:none" role="alert"></div>
+    </div>
+</div>
+
+<!-- ═══════════════════════ HASIL WAKTU EKSEKUSI ═══════════════════════ -->
+<section class="card" id="section-time" style="display:none">
+    <div class="card-header">
+        <h2 class="card-title">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"/>
+                <polyline points="12 6 12 12 16 14"/>
+            </svg>
+            <span>Hasil Pengukuran Waktu (Milidetik)</span>
+        </h2>
+        <div class="btn-row">
+            <button type="button" class="btn btn-secondary btn-sm" onclick="exportCSV()">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="7 10 12 15 17 10"/>
+                    <line x1="12" y1="15" x2="12" y2="3"/>
+                </svg>
+                <span>Export CSV</span>
+            </button>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="exportXLSX()">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="7 10 12 15 17 10"/>
+                    <line x1="12" y1="15" x2="12" y2="3"/>
+                </svg>
+                <span>Export Excel</span>
+            </button>
+        </div>
+    </div>
+
+    <div class="card-body">
+        <div class="table-container mb-6">
+            <table class="app-table">
+                <thead>
+                    <tr>
+                        <th>Algoritma</th>
+                        <th>Ukuran Data</th>
+                        <th>Rata-rata Enkripsi (ms)</th>
+                        <th>Rata-rata Dekripsi (ms)</th>
+                        <th>Min Enkripsi</th>
+                        <th>Min Dekripsi</th>
+                        <th>Max Enkripsi</th>
+                        <th>Max Dekripsi</th>
+                    </tr>
+                </thead>
+                <tbody id="time-table-body"></tbody>
+            </table>
+        </div>
+
+        <!-- Clean Canvas Chart -->
+        <div class="form-grid-2col">
+            <div class="chart-box">
+                <div class="chart-header">Perbandingan Waktu Enkripsi (ms)</div>
+                <canvas id="time-chart-enc" class="chart-canvas" width="460" height="240"></canvas>
+            </div>
+            <div class="chart-box">
+                <div class="chart-header">Perbandingan Waktu Dekripsi (ms)</div>
+                <canvas id="time-chart-dec" class="chart-canvas" width="460" height="240"></canvas>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════════════════ AVALANCHE EFFECT ═══════════════════════ -->
+<section class="card" id="section-kdf" style="display:none">
+    <div class="card-header"><h2 class="card-title"><span>Waktu Derivasi Kunci (PBKDF2)</span></h2></div>
+    <div class="card-body">
+        <p class="text-muted mb-4">Waktu PBKDF2 diukur terpisah dari waktu operasi cipher. Hasil ini memakai jumlah iterasi production.</p>
+        <div class="table-container"><table class="app-table">
+            <thead><tr><th>Algoritma KDF</th><th>Iterasi</th><th>Pengulangan</th><th>Rata-rata (ms)</th><th>Min (ms)</th><th>Max (ms)</th></tr></thead>
+            <tbody id="kdf-table-body"></tbody>
+        </table></div>
+    </div>
+</section>
+
+<section class="card" id="section-avalanche" style="display:none">
+    <div class="card-header">
+        <h2 class="card-title">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M2 12h20"/>
+                <path d="M20 12v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-6"/>
+                <path d="m12 2 4 10-8-5 8 5-4 10"/>
+            </svg>
+            <span>Avalanche Effect</span>
+        </h2>
+    </div>
+
+    <div class="card-body">
+        <p class="text-muted mb-4" style="font-size: 0.88rem;">
+            Avalanche effect menunjukkan persentase bit output yang berubah setelah perubahan kecil pada input eksperimen. Nilai bergantung pada algoritma, mode operasi, dan cara eksperimen dilakukan. Dua eksperimen terkontrol mengubah tepat satu bit: pada plaintext dan pada key.
+            Persentase dihitung sebagai changed bits / total ciphertext bits × 100. Eksperimen memakai nonce tetap hanya untuk mengisolasi perubahan; jangan gunakan ulang nonce pada enkripsi produksi.
+        </p>
+
+        <div id="avalanche-results" class="form-grid-2col"></div>
+    </div>
+</section>
+
+<!-- ═══════════════════════ SHANNON ENTROPY ═══════════════════════ -->
+<section class="card" id="section-entropy" style="display:none">
+    <div class="card-header">
+        <h2 class="card-title">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+            </svg>
+            <span>Shannon Entropy</span>
+        </h2>
+        <span class="nav-badge">Skala 0.0 &ndash; 8.0 bit/byte</span>
+    </div>
+
+    <div class="card-body">
+        <p class="text-muted mb-4" style="font-size: 0.88rem;">
+            Entropy digunakan sebagai metrik statistik distribusi byte, bukan satu-satunya bukti keamanan algoritma. Nilai dihitung untuk plaintext dan ciphertext dari sampel 1 KB.
+        </p>
+
+        <div id="entropy-results" class="form-grid-2col"></div>
+    </div>
+</section>
+
+<!-- ═══════════════════════ HISTOGRAM DISTRIBUSI BYTE ═══════════════════════ -->
+<section class="card" id="section-histogram" style="display:none">
+    <div class="card-header">
+        <h2 class="card-title">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect width="18" height="18" x="3" y="3" rx="2"/>
+                <line x1="3" y1="9" x2="21" y2="9"/>
+                <line x1="9" y1="21" x2="9" y2="9"/>
+            </svg>
+            <span>Distribusi Frekuensi Byte (0–255)</span>
+        </h2>
+    </div>
+
+    <div class="card-body">
+        <p class="text-muted mb-4" style="font-size: 0.88rem;">
+            Histogram memakai 256 bin byte. Sumbu X menunjukkan nilai byte 0–255; sumbu Y menunjukkan frekuensi. Garis dan batang membandingkan plaintext dengan ciphertext.
+        </p>
+        <div id="histogram-container"></div>
+    </div>
+</section>
+
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/benchmark.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,34 @@
+{
+    "mata_kuliah": "Keamanan Informasi",
+    "tahun_ajaran": "2026/2027",
+    "modul": [
+        {
+            "id": 1,
+            "nama": "Kriptografi Simetris",
+            "algoritma": [
+                "AES-256-GCM",
+                "ChaCha20-Poly1305"
+            ]
+        },
+        {
+            "id": 2,
+            "nama": "Key Derivation Function",
+            "algoritma": [
+                "PBKDF2-HMAC-SHA256"
+            ]
+        },
+        {
+            "id": 3,
+            "nama": "Integritas Data",
+            "metode": [
+                "AEAD Authentication Tag"
+            ]
+        }
+    ],
+    "pengaturan_keamanan": {
+        "min_password_len": 1,
+        "max_password_len": 256,
+        "salt_size_bytes": 32,
+        "nonce_size_bytes": 12
+    }
+}

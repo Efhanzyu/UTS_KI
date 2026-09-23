@@ -1,0 +1,274 @@
+{% extends "base.html" %}
+
+{% block title %}Enkripsi & Dekripsi Teks — Brankas File Tugas Kuliah{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">Enkripsi &amp; Dekripsi Teks</h1>
+    <p class="page-subtitle">Enkripsi catatan, teks sensitif, atau konfigurasi akademik menjadi ciphertext Base64.</p>
+</div>
+
+<!-- ═══════════════════════ SEGMENTED TABS ═══════════════════════ -->
+<div class="segmented-control" role="tablist" aria-label="Mode Operasi Teks">
+    <button type="button" class="segmented-btn active" id="tab-encrypt-btn" role="tab"
+            aria-selected="true" aria-controls="tab-encrypt"
+            onclick="switchTab('encrypt')">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect width="18" height="11" x="3" y="11" rx="2" ry="2"/>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+        </svg>
+        <span>Enkripsi Teks</span>
+    </button>
+    <button type="button" class="segmented-btn" id="tab-decrypt-btn" role="tab"
+            aria-selected="false" aria-controls="tab-decrypt"
+            onclick="switchTab('decrypt')">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect width="18" height="11" x="3" y="11" rx="2" ry="2"/>
+            <path d="M7 11V7a5 5 0 0 1 9.9-1"/>
+        </svg>
+        <span>Dekripsi Teks</span>
+    </button>
+</div>
+
+<!-- ═══════════════════════ PANEL ENKRIPSI TEKS ═══════════════════════ -->
+<div class="tab-panel active" id="tab-encrypt" role="tabpanel" aria-labelledby="tab-encrypt-btn">
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 20h9"/>
+                    <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+                </svg>
+                <span>Enkripsi Pesan Teks</span>
+            </h2>
+        </div>
+
+        <div class="card-body">
+            <form id="encrypt-form" novalidate>
+                <div class="form-grid-2col">
+                    <!-- Left: Inputs -->
+                    <div>
+                        <div class="form-group">
+                            <label for="enc-plaintext" class="form-label">
+                                Teks Asli (Plaintext) <span class="required">*</span>
+                            </label>
+                            <textarea
+                                id="enc-plaintext"
+                                name="plaintext"
+                                class="form-textarea"
+                                rows="8"
+                                placeholder="Tulis atau tempel teks yang ingin dienkripsi di sini..."
+                                required
+                            ></textarea>
+                            <div class="form-hint" id="enc-plaintext-counter">0 karakter (0 B)</div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="enc-algorithm" class="form-label">Algoritma</label>
+                            <select id="enc-algorithm" name="algorithm" class="form-select">
+                                <option value="AES-256-GCM" selected>AES-256-GCM (Default)</option>
+                                <option value="ChaCha20-Poly1305">ChaCha20-Poly1305</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="enc-password" class="form-label">
+                                Password <span class="required">*</span>
+                            </label>
+                            <div class="input-password-wrapper">
+                                <input
+                                    type="password"
+                                    id="enc-password"
+                                    name="password"
+                                    class="form-input"
+                                    placeholder="Masukkan password enkripsi..."
+                                    required
+                                    autocomplete="off"
+                                >
+                                <button type="button" class="toggle-pw-btn"
+                                        onclick="togglePassword('enc-password', this)"
+                                        aria-label="Tampilkan atau sembunyikan password">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/>
+                                        <circle cx="12" cy="12" r="3"/>
+                                    </svg>
+                                </button>
+                            </div>
+                            <div class="form-hint">Ingat password ini. Tidak ada cara memulihkan data tanpa password yang benar.</div>
+                        </div>
+
+                        <div class="btn-row mt-4">
+                            <button type="submit" class="btn btn-primary" id="enc-submit-btn">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect width="18" height="11" x="3" y="11" rx="2" ry="2"/>
+                                    <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                                </svg>
+                                <span>Enkripsi Teks</span>
+                            </button>
+                            <button type="button" class="btn btn-ghost" onclick="clearEncryptForm()">
+                                Bersihkan
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Right: Outputs -->
+                    <div>
+                        <div class="form-group">
+                            <label for="enc-ciphertext" class="form-label">Hasil Enkripsi (Ciphertext Base64)</label>
+                            <textarea
+                                id="enc-ciphertext"
+                                class="form-textarea"
+                                rows="8"
+                                readonly
+                                placeholder="Ciphertext Base64 akan muncul di sini setelah enkripsi..."
+                            ></textarea>
+                        </div>
+
+                        <div class="btn-row mb-4" id="enc-copy-row" style="display:none">
+                            <button type="button" class="btn btn-secondary btn-sm" id="copy-cipher-btn" onclick="copyCiphertext()">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect width="14" height="14" x="8" y="8" rx="2" ry="2"/>
+                                    <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>
+                                </svg>
+                                <span>Salin Ciphertext</span>
+                            </button>
+                        </div>
+
+                        <!-- Technical Metadata Summary -->
+                        <div class="result-box" id="enc-info" style="display:none">
+                            <div class="result-box-header">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="10"/>
+                                    <line x1="12" y1="16" x2="12" y2="12"/>
+                                    <line x1="12" y1="8" x2="12.01" y2="8"/>
+                                </svg>
+                                <span>Parameter Kriptografi</span>
+                            </div>
+                            <table class="property-table">
+                                <tbody>
+                                    <tr><td>Algoritma</td><td id="info-algorithm">—</td></tr>
+                                    <tr><td>Ukuran Key</td><td id="info-keysize">—</td></tr>
+                                    <tr><td>KDF</td><td id="info-kdf">—</td></tr>
+                                    <tr><td>Iterasi PBKDF2</td><td id="info-iterations">—</td></tr>
+                                    <tr><td>Ukuran Salt</td><td id="info-salt">—</td></tr>
+                                    <tr><td>Ukuran Nonce</td><td id="info-nonce">—</td></tr>
+                                    <tr><td>Ukuran Ciphertext</td><td id="info-ciphersize">—</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="enc-status" class="alert" style="display:none" role="alert"></div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- ═══════════════════════ PANEL DEKRIPSI TEKS ═══════════════════════ -->
+<div class="tab-panel" id="tab-decrypt" role="tabpanel" aria-labelledby="tab-decrypt-btn">
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect width="18" height="11" x="3" y="11" rx="2" ry="2"/>
+                    <path d="M7 11V7a5 5 0 0 1 9.9-1"/>
+                </svg>
+                <span>Dekripsi Pesan Teks</span>
+            </h2>
+        </div>
+
+        <div class="card-body">
+            <form id="decrypt-form" novalidate>
+                <div class="form-grid-2col">
+                    <!-- Left: Inputs -->
+                    <div>
+                        <div class="form-group">
+                            <label for="dec-ciphertext" class="form-label">
+                                Ciphertext (Base64) <span class="required">*</span>
+                            </label>
+                            <textarea
+                                id="dec-ciphertext"
+                                name="ciphertext"
+                                class="form-textarea"
+                                rows="8"
+                                placeholder="Tempelkan string Base64 ciphertext di sini..."
+                                required
+                            ></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="dec-password" class="form-label">
+                                Password <span class="required">*</span>
+                            </label>
+                            <div class="input-password-wrapper">
+                                <input
+                                    type="password"
+                                    id="dec-password"
+                                    name="password"
+                                    class="form-input"
+                                    placeholder="Masukkan password dekripsi..."
+                                    required
+                                    autocomplete="off"
+                                >
+                                <button type="button" class="toggle-pw-btn"
+                                        onclick="togglePassword('dec-password', this)"
+                                        aria-label="Tampilkan atau sembunyikan password">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/>
+                                        <circle cx="12" cy="12" r="3"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="btn-row mt-4">
+                            <button type="submit" class="btn btn-primary" id="dec-submit-btn">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect width="18" height="11" x="3" y="11" rx="2" ry="2"/>
+                                    <path d="M7 11V7a5 5 0 0 1 9.9-1"/>
+                                </svg>
+                                <span>Dekripsi Teks</span>
+                            </button>
+                            <button type="button" class="btn btn-ghost" onclick="clearDecryptForm()">
+                                Bersihkan
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Right: Outputs -->
+                    <div>
+                        <div class="form-group">
+                            <label for="dec-plaintext" class="form-label">Hasil Dekripsi (Plaintext)</label>
+                            <textarea
+                                id="dec-plaintext"
+                                class="form-textarea"
+                                rows="8"
+                                readonly
+                                placeholder="Plaintext asli akan muncul di sini setelah verifikasi kunci..."
+                            ></textarea>
+                        </div>
+
+                        <div class="btn-row mb-4" id="dec-copy-row" style="display:none">
+                            <button type="button" class="btn btn-secondary btn-sm" id="copy-plain-btn" onclick="copyPlaintext()">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect width="14" height="14" x="8" y="8" rx="2" ry="2"/>
+                                    <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>
+                                </svg>
+                                <span>Salin Plaintext</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="dec-status" class="alert" style="display:none" role="alert"></div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/text.js') }}"></script>
+{% endblock %}

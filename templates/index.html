@@ -1,0 +1,74 @@
+{% extends "base.html" %} {% block title %}Brankas - Keamanan File Tugas{% endblock %} {% block content %}
+<section class="home-hero" aria-labelledby="hero-title">
+    <div class="home-badge">FILE SECURITY / KEAMANAN FILE</div>
+    <h1 class="home-title" id="hero-title">Amankan File.<br>Jaga Tugas<br>Tetap Pribadi.</h1>
+    <p class="home-subtitle">Enkripsi file dan teks dengan proses yang sederhana, langsung dari aplikasi lokal.</p>
+    <p class="home-desc">Brankas membantu melindungi laporan, catatan, dokumen, dan arsip sebelum disimpan atau dibagikan. Password tidak pernah disimpan.</p>
+    <div class="home-actions">
+        <a href="/encrypt" class="btn btn-primary btn-lg">Enkripsi File <span aria-hidden="true">&rarr;</span></a>
+        <a href="/decrypt" class="btn btn-secondary btn-lg">Dekripsi File</a>
+    </div>
+    <div class="home-actions-secondary">
+        <span>Selain file:</span>
+        <a href="/text" class="btn btn-ghost btn-sm">Enkripsi Teks &rarr;</a>
+        <a href="/benchmark" class="btn btn-ghost btn-sm">Benchmark &rarr;</a>
+    </div>
+</section>
+
+<section class="home-intro" aria-labelledby="intro-title">
+    <div class="section-kicker">WHY BRANKAS</div>
+    <div class="intro-grid">
+        <h2 id="intro-title">Protect the Work<br>You Already Have.</h2>
+        <div>
+            <p>File tugas sering tersimpan tanpa lapisan perlindungan tambahan. Brankas memberi ruang aman untuk mengenkripsi data sebelum berpindah tangan atau perangkat.</p>
+            <a class="text-link" href="#how-it-works">Lihat cara kerja <span aria-hidden="true">&rarr;</span></a>
+        </div>
+    </div>
+</section>
+
+<section class="process-section" id="how-it-works" aria-labelledby="process-title">
+    <div class="section-kicker">A SIMPLE PROCESS</div>
+    <h2 id="process-title">Four steps. No extra noise.</h2>
+    <div class="process-line">
+        <div class="process-step"><strong>01</strong><span>SELECT</span>
+            <p>Pilih file.</p>
+        </div>
+        <div class="process-step"><strong>02</strong><span>PROTECT</span>
+            <p>Masukkan password.</p>
+        </div>
+        <div class="process-step"><strong>03</strong><span>ENCRYPT</span>
+            <p>Data diproses dengan AEAD.</p>
+        </div>
+        <div class="process-step"><strong>04</strong><span>DOWNLOAD</span>
+            <p>Simpan file <code>.enc</code>.</p>
+        </div>
+    </div>
+</section>
+
+<section class="home-tools" aria-labelledby="tools-title">
+    <div class="tools-copy">
+        <div class="section-kicker">THE TOOLKIT</div>
+        <h2 id="tools-title">Encryption,<br>without the extra noise.</h2>
+        <p>Gunakan file encryption untuk dokumen besar, atau lindungi catatan pendek melalui text encryption.</p>
+        <a href="/file" class="text-link">Buka brankas file <span aria-hidden="true">&rarr;</span></a>
+    </div>
+    <div class="tool-preview" aria-label="Preview file terenkripsi">
+        <div class="preview-top"><span>BRANKAS / PREVIEW</span><span class="preview-dot"></span></div>
+        <div class="preview-file-icon" aria-hidden="true">PDF</div>
+        <div class="preview-filename">Laporan_PIS.pdf</div>
+        <div class="preview-meta">2.4 MB <span>•</span> AES-256-GCM</div>
+        <div class="preview-status">ENCRYPTED <span aria-hidden="true">&#10003;</span></div>
+    </div>
+</section>
+
+<section class="security-section" id="about" aria-labelledby="security-title">
+    <div class="section-kicker">BUILT AROUND MODERN CRYPTOGRAPHY</div>
+    <h2 id="security-title">Security you can inspect.</h2>
+    <div class="security-list">
+        <div><strong>AES-256-GCM</strong><span>Authenticated encryption</span></div>
+        <div><strong>PBKDF2</strong><span>Password-based key derivation</span></div>
+        <div><strong>Random salt</strong><span>Unique on every encryption</span></div>
+        <div><strong>Authentication tag</strong><span>Modified data is rejected</span></div>
+    </div>
+</section>
+{% endblock %}
