@@ -15,6 +15,7 @@ from cryptography.exceptions import InvalidTag
 from app.services import encryption_service
 from app.services import file_service
 from app.services import benchmark_service
+from app.services import benchmark_export_service
 from app.services import storage_service
 from app.crypto import container as container_module
 from app.utils.security import validate_password, validate_algorithm, validate_plaintext
@@ -415,3 +416,32 @@ def run_benchmark():
     try: return _ok("Benchmark selesai.",benchmark_service.run_full_benchmark(sizes,runs))
     except ValueError as exc: return _err(str(exc))
     except Exception: return _err("Benchmark gagal karena kesalahan internal.",500)
+
+
+def _benchmark_export(format_name):
+    data = request.get_json(silent=True) or {}
+    try:
+        if format_name == "csv":
+            payload = benchmark_export_service.csv_bytes(data)
+            return send_file(io.BytesIO(payload), as_attachment=True,
+                             download_name="benchmark-results.csv", mimetype="text/csv")
+        payload = benchmark_export_service.xlsx_bytes(data)
+        return send_file(
+            io.BytesIO(payload), as_attachment=True,
+            download_name="benchmark-results.xlsx",
+            mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        )
+    except ValueError as exc:
+        return _err(str(exc))
+    except Exception:
+        return _err("Export benchmark gagal. Silakan coba lagi.", 500)
+
+
+@api_bp.route("/benchmark/export/csv", methods=["POST"])
+def export_benchmark_csv():
+    return _benchmark_export("csv")
+
+
+@api_bp.route("/benchmark/export/excel", methods=["POST"])
+def export_benchmark_excel():
+    return _benchmark_export("excel")

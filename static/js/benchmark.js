@@ -357,39 +357,48 @@ function drawHistogramCanvas(canvasId, pHist, cHist, ciphertextColor = '#0EA5E9'
 }
 
 // ── Export Results ──────────────────────────────────────────────
-function exportCSV() {
+async function exportBenchmark(format) {
     if (!latestBenchmarkData || !latestBenchmarkData.time_benchmark) {
         showStatus('bench-status', 'Jalankan benchmark terlebih dahulu sebelum mengekspor data.', 'warning');
         return;
     }
+    const buttons = document.querySelectorAll('#section-time .btn-row button');
+    buttons.forEach(button => { button.disabled = true; });
+    try {
+        const response = await fetch(`/api/benchmark/export/${format}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(latestBenchmarkData)
+        });
+        if (!response.ok) {
+            const error = await response.json().catch(() => ({}));
+            throw new Error(error.message || 'Export benchmark gagal.');
+        }
+        triggerBlobDownload(await response.blob(),
+            format === 'csv' ? 'benchmark-results.csv' : 'benchmark-results.xlsx');
+    } catch (error) {
+        console.error(error);
+        showStatus('bench-status', 'Export benchmark gagal. Silakan coba lagi.', 'error');
+    } finally {
+        buttons.forEach(button => { button.disabled = false; });
+    }
+}
 
-    let csv = 'Algoritma,Ukuran Data,Pengulangan,Avg Enc (ms),Avg Dec (ms),Min Enc (ms),Min Dec (ms),Max Enc (ms),Max Dec (ms)\n';
-    latestBenchmarkData.time_benchmark.forEach(row => {
-        csv += `"${row.algorithm}","${row.size_label}",${row.runs},${row.avg_encryption_ms},${row.avg_decryption_ms},${row.min_encryption_ms},${row.min_decryption_ms},${row.max_encryption_ms},${row.max_decryption_ms}\n`;
-    });
-
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    triggerBlobDownload(blob, 'benchmark_results.csv');
+function exportCSV() {
+    return exportBenchmark('csv');
 }
 
 function exportXLSX() {
-    if (!latestBenchmarkData || !latestBenchmarkData.time_benchmark) {
-        showStatus('bench-status', 'Jalankan benchmark terlebih dahulu sebelum mengekspor data.', 'warning');
-        return;
-    }
+    return exportBenchmark('excel');
+}
 
-    let html = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">';
-    html += '<head><meta charset="utf-8"></head><body>';
-    html += '<h3>Hasil Benchmark Kriptografi &mdash; Brankas File Tugas Kuliah</h3>';
-    html += '<table border="1"><thead><tr style="background:#0F172A;color:#ffffff">';
-    html += '<th>Algoritma</th><th>Ukuran</th><th>Runs</th><th>Avg Enc (ms)</th><th>Avg Dec (ms)</th><th>Min Enc (ms)</th><th>Min Dec (ms)</th><th>Max Enc (ms)</th><th>Max Dec (ms)</th>';
-    html += '</tr></thead><tbody>';
-
-    latestBenchmarkData.time_benchmark.forEach(r => {
-        html += `<tr><td>${r.algorithm}</td><td>${r.size_label}</td><td>${r.runs}</td><td>${r.avg_encryption_ms}</td><td>${r.avg_decryption_ms}</td><td>${r.min_encryption_ms}</td><td>${r.min_decryption_ms}</td><td>${r.max_encryption_ms}</td><td>${r.max_decryption_ms}</td></tr>`;
-    });
-    html += '</tbody></table></body></html>';
-
-    const blob = new Blob([html], { type: 'application/vnd.ms-excel' });
-    triggerBlobDownload(blob, 'benchmark_results.xls');
+function triggerBlobDownload(blob, filename) {
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
 }
