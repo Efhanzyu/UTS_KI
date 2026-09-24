@@ -42,9 +42,12 @@ MAX_CONTENT_MB=64
 PBKDF2_ITERATIONS=600000
 BENCHMARK_KDF_ITERATIONS=1000
 BENCHMARK_RUNS=10
+SUPABASE_URL=
+SUPABASE_SERVICE_ROLE_KEY=
+SUPABASE_STORAGE_BUCKET=brankas-files
 ```
 
-`SECRET_KEY` wajib diisi pada production. Project ini tidak memiliki fitur hybrid RSA; karena itu `RSA_PRIVATE_KEY_PATH` tidak diperlukan.
+`SECRET_KEY` wajib diisi pada production. `SUPABASE_SERVICE_ROLE_KEY` hanya boleh berada di backend environment variable. Project ini tidak memiliki fitur hybrid RSA; karena itu `RSA_PRIVATE_KEY_PATH` tidak diperlukan.
 
 ## Deploy to Render
 
@@ -98,6 +101,20 @@ Project ini menggunakan `api/index.py` sebagai serverless WSGI entry point dan `
 7. Verifikasi `GET /api/health` mengembalikan HTTP 200.
 
 Jangan memasukkan nilai secret ke `vercel.json`, source code, atau repository. Vercel Functions memiliki filesystem ephemeral; aplikasi ini hanya memproses upload selama request dan mengirim hasil sebagai download response.
+
+## Supabase Storage Setup
+
+1. Buat project baru di Supabase.
+2. Buka **Storage** dan buat bucket `brankas-files`.
+3. Set bucket sebagai **Private**, bukan public.
+4. Salin Project URL ke `SUPABASE_URL`.
+5. Salin server-side service role key ke `SUPABASE_SERVICE_ROLE_KEY` pada Vercel.
+6. Set `SUPABASE_STORAGE_BUCKET=brankas-files`.
+7. Redeploy Vercel.
+
+Service role key hanya digunakan oleh Flask backend. Browser tidak menerima key tersebut. Object dienkripsi lebih dulu sebelum diunggah ke path server-generated `users/<session-id>/<file-id>.enc`. Session ID membatasi daftar, download, decrypt, dan delete ke browser owner yang sama.
+
+Metadata file dibaca dari header container `.enc`; tidak ada password atau encryption key yang disimpan. Plaintext tidak pernah diunggah ke Supabase dan hasil dekripsi hanya dikirim dari memory sebagai response.
 
 ## Testing
 

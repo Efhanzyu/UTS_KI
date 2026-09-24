@@ -1,8 +1,4 @@
-{% extends "base.html" %}
-
-{% block title %}Enkripsi & Dekripsi File — Brankas File Tugas Kuliah{% endblock %}
-
-{% block content %}
+{% extends "base.html" %} {% block title %}Enkripsi & Dekripsi File — Brankas File Tugas Kuliah{% endblock %} {% block content %}
 <div class="page-header">
     <h1 class="page-title" id="page-main-heading">Enkripsi &amp; Dekripsi File</h1>
     <p class="page-subtitle">Lindungi atau pulihkan berkas tugas kuliah dengan enkripsi modern berotentikasi.</p>
@@ -10,22 +6,14 @@
 
 <!-- ═══════════════════════ SEGMENTED TAB SWITCHER ═══════════════════════ -->
 <div class="segmented-control" role="tablist" aria-label="Mode Operasi File">
-    <button type="button" class="segmented-btn {% if initial_mode != 'decrypt' %}active{% endif %}"
-            id="tab-btn-encrypt" role="tab"
-            aria-selected="{% if initial_mode != 'decrypt' %}true{% else %}false{% endif %}"
-            aria-controls="panel-encrypt"
-            onclick="switchFileMode('encrypt')">
+    <button type="button" class="segmented-btn {% if initial_mode != 'decrypt' %}active{% endif %}" id="tab-btn-encrypt" role="tab" aria-selected="{% if initial_mode != 'decrypt' %}true{% else %}false{% endif %}" aria-controls="panel-encrypt" onclick="switchFileMode('encrypt')">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <rect width="18" height="11" x="3" y="11" rx="2" ry="2"/>
             <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
         </svg>
         <span>Enkripsi File</span>
     </button>
-    <button type="button" class="segmented-btn {% if initial_mode == 'decrypt' %}active{% endif %}"
-            id="tab-btn-decrypt" role="tab"
-            aria-selected="{% if initial_mode == 'decrypt' %}true{% else %}false{% endif %}"
-            aria-controls="panel-decrypt"
-            onclick="switchFileMode('decrypt')">
+    <button type="button" class="segmented-btn {% if initial_mode == 'decrypt' %}active{% endif %}" id="tab-btn-decrypt" role="tab" aria-selected="{% if initial_mode == 'decrypt' %}true{% else %}false{% endif %}" aria-controls="panel-decrypt" onclick="switchFileMode('decrypt')">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <rect width="18" height="11" x="3" y="11" rx="2" ry="2"/>
             <path d="M7 11V7a5 5 0 0 1 9.9-1"/>
@@ -105,18 +93,8 @@
                     <div class="form-group">
                         <label for="enc-file-password" class="form-label">Password <span class="required">*</span></label>
                         <div class="input-password-wrapper">
-                            <input
-                                type="password"
-                                id="enc-file-password"
-                                name="password"
-                                class="form-input"
-                                placeholder="Masukkan password enkripsi..."
-                                required
-                                autocomplete="off"
-                            >
-                            <button type="button" class="toggle-pw-btn"
-                                    onclick="togglePassword('enc-file-password', this)"
-                                    aria-label="Tampilkan atau sembunyikan password">
+                            <input type="password" id="enc-file-password" name="password" class="form-input" placeholder="Masukkan password enkripsi..." required autocomplete="off">
+                            <button type="button" class="toggle-pw-btn" onclick="togglePassword('enc-file-password', this)" aria-label="Tampilkan atau sembunyikan password">
                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                     <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/>
                                     <circle cx="12" cy="12" r="3"/>
@@ -151,10 +129,22 @@
                     </div>
                     <table class="property-table mb-4">
                         <tbody>
-                            <tr><td>Nama File Output</td><td id="enc-res-filename">—</td></tr>
-                            <tr><td>Algoritma</td><td id="enc-res-algorithm">—</td></tr>
-                            <tr><td>KDF (Key Derivation)</td><td>PBKDF2-HMAC-SHA256 (600.000 iterasi)</td></tr>
-                            <tr><td>Ukuran File Output</td><td id="enc-res-filesize">—</td></tr>
+                            <tr>
+                                <td>Nama File Output</td>
+                                <td id="enc-res-filename">—</td>
+                            </tr>
+                            <tr>
+                                <td>Algoritma</td>
+                                <td id="enc-res-algorithm">—</td>
+                            </tr>
+                            <tr>
+                                <td>KDF (Key Derivation)</td>
+                                <td>PBKDF2-HMAC-SHA256 (600.000 iterasi)</td>
+                            </tr>
+                            <tr>
+                                <td>Ukuran File Output</td>
+                                <td id="enc-res-filesize">—</td>
+                            </tr>
                         </tbody>
                     </table>
                     <button type="button" class="btn btn-primary btn-sm" id="enc-download-btn">
@@ -231,18 +221,8 @@
                 <div class="form-group">
                     <label for="dec-file-password" class="form-label">Password Dekripsi <span class="required">*</span></label>
                     <div class="input-password-wrapper">
-                        <input
-                            type="password"
-                            id="dec-file-password"
-                            name="password"
-                            class="form-input"
-                            placeholder="Password yang digunakan saat enkripsi..."
-                            required
-                            autocomplete="off"
-                        >
-                        <button type="button" class="toggle-pw-btn"
-                                onclick="togglePassword('dec-file-password', this)"
-                                aria-label="Tampilkan atau sembunyikan password">
+                        <input type="password" id="dec-file-password" name="password" class="form-input" placeholder="Password yang digunakan saat enkripsi..." required autocomplete="off">
+                        <button type="button" class="toggle-pw-btn" onclick="togglePassword('dec-file-password', this)" aria-label="Tampilkan atau sembunyikan password">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/>
                                 <circle cx="12" cy="12" r="3"/>
@@ -276,8 +256,14 @@
                     </div>
                     <table class="property-table mb-4">
                         <tbody>
-                            <tr><td>Nama File Asli</td><td id="dec-res-filename">—</td></tr>
-                            <tr><td>Integritas</td><td>Valid (Autentikasi AEAD Cocok)</td></tr>
+                            <tr>
+                                <td>Nama File Asli</td>
+                                <td id="dec-res-filename">—</td>
+                            </tr>
+                            <tr>
+                                <td>Integritas</td>
+                                <td>Valid (Autentikasi AEAD Cocok)</td>
+                            </tr>
                         </tbody>
                     </table>
                     <button type="button" class="btn btn-primary btn-sm" id="dec-download-btn">
@@ -295,8 +281,18 @@
     </div>
 </div>
 
-{% endblock %}
+<section class="stored-files-section" id="stored-files-section" style="display:none" aria-labelledby="stored-files-title">
+    <div class="stored-files-header">
+        <div>
+            <div class="section-kicker">PRIVATE STORAGE</div>
+            <h2 id="stored-files-title">File Tersimpan</h2>
+        </div>
+        <button type="button" class="btn btn-secondary btn-sm" id="refresh-stored-files">Muat Ulang</button>
+    </div>
+    <div id="stored-files-status" class="alert" style="display:none" role="status"></div>
+    <div id="stored-files-list" class="stored-files-list"></div>
+</section>
 
-{% block scripts %}
+{% endblock %} {% block scripts %}
 <script src="{{ url_for('static', filename='js/file.js') }}"></script>
 {% endblock %}

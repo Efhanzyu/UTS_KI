@@ -814,6 +814,65 @@ code {
     border-bottom: 1px solid #292929;
 }
 
+.stored-files-section {
+    margin-top: 48px;
+    padding-top: 28px;
+    border-top: 1px solid #333;
+}
+
+.stored-files-header {
+    display: flex;
+    align-items: end;
+    justify-content: space-between;
+    gap: 24px;
+    margin-bottom: 20px;
+}
+
+.stored-files-header h2 {
+    margin-top: 8px;
+}
+
+.stored-files-list {
+    display: grid;
+    gap: 0;
+    border-top: 1px solid #292929;
+}
+
+.stored-file-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    padding: 18px 0;
+    border-bottom: 1px solid #292929;
+}
+
+.stored-file-info {
+    display: grid;
+    gap: 6px;
+    min-width: 0;
+}
+
+.stored-file-info strong {
+    overflow: hidden;
+    color: var(--text-heading);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.stored-file-info span,
+.stored-files-empty {
+    color: var(--text-muted);
+    font-size: .82rem;
+}
+
+.stored-file-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
 .security-list strong {
     color: var(--text-heading);
     font-size: .93rem;
@@ -952,6 +1011,14 @@ code {
     .security-list>div {
         grid-template-columns: 1fr;
         gap: 4px;
+    }
+    .stored-file-item {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 14px;
+    }
+    .stored-file-actions {
+        justify-content: flex-start;
     }
     .feature-grid-2x2 {
         grid-template-columns: 1fr;
