@@ -55,4 +55,11 @@ def create_app(config_class: type = Config) -> Flask:
     def method_not_allowed(error):
         return jsonify({"success": False, "message": "Method tidak diizinkan."}), 405
 
+    @app.errorhandler(500)
+    def internal_server_error(error):
+        return jsonify({
+            "success": False,
+            "message": "Terjadi kesalahan internal pada server."
+        }), 500
+
     return app

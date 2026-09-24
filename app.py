@@ -9,15 +9,16 @@ Atau dengan Flask CLI:
 
 Aplikasi berjalan di: http://127.0.0.1:5000
 """
+import os
+
 from app import create_app
 
 app = create_app()
 
 if __name__ == "__main__":
-    # Debug mode dikontrol via FLASK_ENV di .env
-    # Jangan aktifkan debug=True secara manual di production!
+    # Development server only; Render uses Gunicorn via render.yaml.
     app.run(
         host="127.0.0.1",
-        port=5000,
+        port=int(os.environ.get("PORT", "5000")),
         debug=app.config["DEBUG"],
     )

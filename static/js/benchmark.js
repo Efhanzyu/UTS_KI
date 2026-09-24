@@ -11,16 +11,20 @@ async function runBenchmark() {
 
     // Collect selected sizes
     const sizes = [];
-    if (document.getElementById('size-1kb')?.checked) sizes.push(1);
-    if (document.getElementById('size-1mb')?.checked) sizes.push(1024);
-    if (document.getElementById('size-10mb')?.checked) sizes.push(10240);
+    const size1kb = document.getElementById('size-1kb');
+    const size1mb = document.getElementById('size-1mb');
+    const size10mb = document.getElementById('size-10mb');
+    if (size1kb && size1kb.checked) sizes.push(1);
+    if (size1mb && size1mb.checked) sizes.push(1024);
+    if (size10mb && size10mb.checked) sizes.push(10240);
 
     if (sizes.length === 0) {
         showStatus('bench-status', 'Silakan pilih minimal satu ukuran data uji.', 'warning');
         return;
     }
 
-    const runs = parseInt(document.getElementById('bench-runs')?.value || '10', 10);
+    const runsInput = document.getElementById('bench-runs');
+    const runs = parseInt(runsInput && runsInput.value || '10', 10);
 
     runBtn.disabled = true;
     const originalBtnHtml = runBtn.innerHTML;
@@ -106,8 +110,8 @@ function drawBarChart(canvasId, timeData, field, title) {
     const sizes = [...new Set(timeData.map(d => d.size_label))];
     const algos = ['AES-256-GCM', 'ChaCha20-Poly1305'];
     const colors = {
-        'AES-256-GCM': '#0F172A',       // Deep Navy
-        'ChaCha20-Poly1305': '#2563EB'  // Restrained Blue
+        'AES-256-GCM': '#F97316', // Bright Orange
+        'ChaCha20-Poly1305': '#2563EB' // Restrained Blue
     };
 
     let maxVal = 0;
@@ -265,6 +269,7 @@ function renderHistogram(histogramData) {
     const container = document.getElementById('histogram-container');
     if (!container || !histogramData) return;
     container.innerHTML = '';
+    const ciphertextColor = '#0EA5E9';
 
     histogramData.forEach((item, idx) => {
         const wrapper = document.createElement('div');
@@ -274,18 +279,18 @@ function renderHistogram(histogramData) {
             <canvas id="hist-canvas-${idx}" width="800" height="180" class="chart-canvas" role="img" aria-label="Histogram byte plaintext dan ciphertext, sumbu X nilai byte 0 sampai 255, sumbu Y frekuensi"></canvas>
             <div style="display: flex; gap: 16px; margin-top: 8px; font-size: 0.82rem; color: #64748B;">
                 <span><span style="display:inline-block; width:10px; height:10px; background:rgba(220, 38, 38, 0.4); margin-right:4px;"></span> Plaintext (pola frekuensi)</span>
-                <span><span style="display:inline-block; width:10px; height:10px; background:#0F172A; margin-right:4px;"></span> Ciphertext (distribusi seragam)</span>
+                <span><span style="display:inline-block; width:10px; height:10px; background:${ciphertextColor}; margin-right:4px;"></span> Ciphertext (distribusi seragam)</span>
             </div>
         `;
         container.appendChild(wrapper);
 
         setTimeout(() => {
-            drawHistogramCanvas(`hist-canvas-${idx}`, item.plaintext_histogram, item.ciphertext_histogram);
+            drawHistogramCanvas(`hist-canvas-${idx}`, item.plaintext_histogram, item.ciphertext_histogram, ciphertextColor);
         }, 10);
     });
 }
 
-function drawHistogramCanvas(canvasId, pHist, cHist) {
+function drawHistogramCanvas(canvasId, pHist, cHist, ciphertextColor = '#0EA5E9') {
     const canvas = document.getElementById(canvasId);
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
@@ -337,9 +342,9 @@ function drawHistogramCanvas(canvasId, pHist, cHist) {
         ctx.fillRect(x, y, barW, h);
     }
 
-    // Ciphertext Line (Navy)
-    ctx.strokeStyle = '#0F172A';
-    ctx.lineWidth = 1.25;
+    // Ciphertext Line (Bright Cyan)
+    ctx.strokeStyle = ciphertextColor;
+    ctx.lineWidth = 1.75;
     ctx.beginPath();
     for (let i = 0; i < 256; i++) {
         const h = (cHist[i] / maxVal) * chartH;

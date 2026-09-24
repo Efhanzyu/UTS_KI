@@ -1,18 +1,21 @@
 {% extends "base.html" %} {% block title %}Brankas - Keamanan File Tugas{% endblock %} {% block content %}
 <section class="home-hero" aria-labelledby="hero-title">
-    <div class="home-badge">FILE SECURITY / KEAMANAN FILE</div>
-    <h1 class="home-title" id="hero-title">Amankan File.<br>Jaga Tugas<br>Tetap Pribadi.</h1>
-    <p class="home-subtitle">Enkripsi file dan teks dengan proses yang sederhana, langsung dari aplikasi lokal.</p>
-    <p class="home-desc">Brankas membantu melindungi laporan, catatan, dokumen, dan arsip sebelum disimpan atau dibagikan. Password tidak pernah disimpan.</p>
-    <div class="home-actions">
-        <a href="/encrypt" class="btn btn-primary btn-lg">Enkripsi File <span aria-hidden="true">&rarr;</span></a>
-        <a href="/decrypt" class="btn btn-secondary btn-lg">Dekripsi File</a>
+    <div class="home-content">
+        <div class="home-badge">FILE SECURITY / KEAMANAN FILE</div>
+        <h1 class="home-title" id="hero-title">Amankan File. Jaga Tugas Tetap Pribadi.</h1>
+        <p class="home-subtitle">Enkripsi file dan teks dengan proses yang sederhana, langsung dari aplikasi lokal.</p>
+        <p class="home-desc">Brankas membantu melindungi laporan, catatan, dokumen, dan arsip sebelum disimpan atau dibagikan. Password tidak pernah disimpan.</p>
+        <div class="home-actions">
+            <a href="/encrypt" class="btn btn-primary btn-lg">Enkripsi File <span aria-hidden="true">&rarr;</span></a>
+            <a href="/decrypt" class="btn btn-secondary btn-lg">Dekripsi File</a>
+        </div>
+        <div class="home-actions-secondary">
+            <span>Selain file:</span>
+            <a href="/text" class="btn btn-ghost btn-sm">Enkripsi Teks &rarr;</a>
+            <a href="/benchmark" class="btn btn-ghost btn-sm">Benchmark &rarr;</a>
+        </div>
     </div>
-    <div class="home-actions-secondary">
-        <span>Selain file:</span>
-        <a href="/text" class="btn btn-ghost btn-sm">Enkripsi Teks &rarr;</a>
-        <a href="/benchmark" class="btn btn-ghost btn-sm">Benchmark &rarr;</a>
-    </div>
+
 </section>
 
 <section class="home-intro" aria-labelledby="intro-title">
@@ -53,11 +56,11 @@
         <a href="/file" class="text-link">Buka brankas file <span aria-hidden="true">&rarr;</span></a>
     </div>
     <div class="tool-preview" aria-label="Preview file terenkripsi">
-        <div class="preview-top"><span>BRANKAS / PREVIEW</span><span class="preview-dot"></span></div>
-        <div class="preview-file-icon" aria-hidden="true">PDF</div>
-        <div class="preview-filename">Laporan_PIS.pdf</div>
-        <div class="preview-meta">2.4 MB <span>•</span> AES-256-GCM</div>
-        <div class="preview-status">ENCRYPTED <span aria-hidden="true">&#10003;</span></div>
+        <div class="preview-top"><span>BRANKAS / SECURITY CONCEPT</span><span class="preview-dot"></span></div>
+        <div class="preview-file-icon" aria-hidden="true">SECURE</div>
+        <div class="preview-filename">SECURE DOCUMENT</div>
+        <div class="preview-meta">ENCRYPTED FILE <span>•</span> AES-256-GCM</div>
+        <div class="preview-status">AUTHENTICATED</div>
     </div>
 </section>
 

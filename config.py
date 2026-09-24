@@ -11,7 +11,7 @@ def resolve_secret_key(secret_key: str | None, environment: str) -> str:
         raise RuntimeError("SECRET_KEY must be set in production.")
     return secrets.token_hex(32)
 
-_ENVIRONMENT=os.environ.get("FLASK_ENV","development").lower()
+_ENVIRONMENT = os.environ.get("FLASK_ENV", "development").lower()
 _SECRET_KEY=resolve_secret_key(os.environ.get("SECRET_KEY"),_ENVIRONMENT)
 
 class Config:
@@ -23,3 +23,4 @@ class Config:
     BENCHMARK_KDF_ITERATIONS: int = int(os.environ.get("BENCHMARK_KDF_ITERATIONS",1_000))
     BENCHMARK_RUNS: int = int(os.environ.get("BENCHMARK_RUNS",10))
     BENCHMARK_MAX_RUNS: int = 100
+    PORT: int = int(os.environ.get("PORT", 5000))

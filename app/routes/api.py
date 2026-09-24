@@ -43,7 +43,7 @@ def _err(message: str, status: int = 400):
 @api_bp.route("/health", methods=["GET"])
 def health():
     """Health check endpoint."""
-    return _ok("OK", {"status": "healthy", "app": "Brankas File Tugas Kuliah"})
+    return _ok("Brankas API is running", {"status": "healthy", "app": "Brankas File Tugas Kuliah"})
 
 
 # ── Enkripsi Teks ─────────────────────────────────────────────────
