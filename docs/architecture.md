@@ -30,7 +30,7 @@
 +------------------------------------------------------------------+
 |                    Services Layer (app/services)                 |
 |   - encryption_service.py: Orkestrasi Alur Kriptografi           |
-|   - file_service.py: Penanganan File Temp dengan Nama UUID Acak  |
+|   - file_service.py: Sanitasi Nama File & Deteksi MIME           |
 |   - benchmark_service.py: Pengukuran Waktu, Avalanche, Entropy   |
 +---------------------------------+--------------------------------+
                                   |
@@ -102,7 +102,7 @@ Format biner mandiri (self-contained) yang memuat metadata penting untuk dekrips
 ---
 
 ## 5. Pertimbangan Keamanan (Security Considerations)
-1. **Pencegahan Path Traversal**: Nama file asli hanya disimpan sebagai string metadata dalam header JSON dan disanitasi menggunakan `werkzeug.utils.secure_filename`. File sementara di filesystem server menggunakan nama `uuid.uuid4()`.
+1. **Pencegahan Path Traversal**: Nama file asli hanya disimpan sebagai metadata container dan disanitasi menggunakan `werkzeug.utils.secure_filename`; nama tersebut tidak digunakan sebagai path filesystem.
 2. **Generic Error Message**: Pesan error kegagalan dekripsi sengaja dibuat generik (*"Dekripsi gagal: password salah atau data telah dimodifikasi."*) agar penyerang tidak dapat membedakan antara password salah dan modifikasi data.
 3. **Pembersihan Memori Kunci**: Variabel kunci (`key`) dihapus secara eksplisit setelah operasi enkripsi/dekripsi selesai.
 4. **Batas Ukuran Upload**: Dibatasi oleh Flask `MAX_CONTENT_LENGTH` sebesar 64 MB untuk mitigasi Denial of Service (DoS).

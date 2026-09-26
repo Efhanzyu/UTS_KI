@@ -1,7 +1,7 @@
 """Application configuration and secret handling."""
 import os
 import secrets
-from dotenv import load_dotenv
+from dotenv import load_dotenv # pyright: ignore[reportMissingImports]
 load_dotenv()
 
 def resolve_secret_key(secret_key: str | None, environment: str) -> str:
@@ -24,6 +24,3 @@ class Config:
     BENCHMARK_RUNS: int = int(os.environ.get("BENCHMARK_RUNS",10))
     BENCHMARK_MAX_RUNS: int = 100
     PORT: int = int(os.environ.get("PORT", 5000))
-    SUPABASE_URL: str = os.environ.get("SUPABASE_URL", "").strip()
-    SUPABASE_SERVICE_ROLE_KEY: str = os.environ.get("SUPABASE_SERVICE_ROLE_KEY", "").strip()
-    SUPABASE_STORAGE_BUCKET: str = os.environ.get("SUPABASE_STORAGE_BUCKET", "brankas-files").strip()

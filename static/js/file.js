@@ -49,9 +49,6 @@ document.addEventListener('DOMContentLoaded', () => {
         switchFileMode('decrypt');
     }
 
-    const refreshStoredFilesButton = document.getElementById('refresh-stored-files');
-    if (refreshStoredFilesButton) refreshStoredFilesButton.addEventListener('click', loadStoredFiles);
-    loadStoredFiles();
 });
 
 // Segmented Mode Switcher (Enkripsi vs Dekripsi)
@@ -232,7 +229,6 @@ async function handleFileEncrypt(e) {
             document.getElementById('enc-file-result').style.display = 'block';
 
             showStatus('enc-file-status', 'File berhasil dienkripsi! Unduhan berkas .enc dimulai.', 'success');
-            loadStoredFiles();
 
             // Trigger download
             triggerBlobDownload(blob, filename);
@@ -330,86 +326,4 @@ function triggerBlobDownload(blob, filename) {
     a.click();
     document.body.removeChild(a);
     setTimeout(() => URL.revokeObjectURL(url), 10000);
-}
-
-async function loadStoredFiles() {
-    const section = document.getElementById('stored-files-section');
-    const list = document.getElementById('stored-files-list');
-    if (!section || !list) return;
-
-    try {
-        const response = await fetch('/api/storage/files');
-        const result = await response.json();
-        if (!response.ok || !result.success || !result.data || !result.data.configured) {
-            section.style.display = 'none';
-            return;
-        }
-
-        section.style.display = 'block';
-        const files = result.data.files || [];
-        list.innerHTML = files.length ? files.map(renderStoredFile).join('') :
-            '<p class="stored-files-empty">Belum ada file terenkripsi tersimpan.</p>';
-    } catch (error) {
-        section.style.display = 'none';
-    }
-}
-
-function renderStoredFile(file) {
-    return `
-        <article class="stored-file-item">
-            <div class="stored-file-info">
-                <strong>${escapeHtml(file.original_filename)}.enc</strong>
-                <span>${escapeHtml(file.algorithm)} / ${formatBytes(file.size_bytes)}</span>
-            </div>
-            <div class="stored-file-actions">
-                <button type="button" class="btn btn-secondary btn-sm" onclick="downloadStoredFile('${file.id}')">Download</button>
-                <button type="button" class="btn btn-secondary btn-sm" onclick="decryptStoredFile('${file.id}')">Decrypt</button>
-                <button type="button" class="btn btn-ghost btn-sm" onclick="deleteStoredFile('${file.id}')">Delete</button>
-            </div>
-        </article>
-    `;
-}
-
-async function downloadStoredFile(fileId) {
-    const response = await fetch(`/api/storage/files/${encodeURIComponent(fileId)}`);
-    if (!response.ok) {
-        showStoredFilesStatus('File tersimpan tidak dapat diunduh.', 'error');
-        return;
-    }
-    triggerBlobDownload(await response.blob(), getDownloadFilename(response, `${fileId}.enc`));
-}
-
-async function decryptStoredFile(fileId) {
-    const password = window.prompt('Masukkan password file terenkripsi:');
-    if (!password) return;
-    const response = await fetch(`/api/storage/files/${encodeURIComponent(fileId)}/decrypt`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ password })
-    });
-    if (!response.ok) {
-        showStoredFilesStatus('Dekripsi file tersimpan gagal.', 'error');
-        return;
-    }
-    triggerBlobDownload(await response.blob(), getDownloadFilename(response, 'decrypted_file'));
-}
-
-async function deleteStoredFile(fileId) {
-    if (!window.confirm('Hapus file terenkripsi ini dari storage?')) return;
-    const response = await fetch(`/api/storage/files/${encodeURIComponent(fileId)}`, { method: 'DELETE' });
-    if (!response.ok) {
-        showStoredFilesStatus('File tersimpan gagal dihapus.', 'error');
-        return;
-    }
-    loadStoredFiles();
-}
-
-function getDownloadFilename(response, fallback) {
-    const disposition = response.headers.get('content-disposition') || '';
-    const match = disposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
-    return match && match[1] ? match[1].replace(/['"]/g, '') : fallback;
-}
-
-function showStoredFilesStatus(message, type) {
-    showStatus('stored-files-status', message, type);
 }

@@ -45,6 +45,14 @@ def test_wrong_password_and_tampered_file_are_rejected_without_download(client, 
     }, content_type="multipart/form-data")
     assert encrypted.status_code == 200
     ciphertext = encrypted.data
+    assert encrypted.headers["Content-Disposition"].endswith('filename=sample.pdf.enc')
+    assert "X-Brankas-Storage-Id" not in encrypted.headers
+
+    restored = client.post("/api/decrypt/file", data={
+        "file": (io.BytesIO(ciphertext), "sample.pdf.enc"), "password": sample_password
+    }, content_type="multipart/form-data")
+    assert restored.status_code == 200
+    assert restored.data == source
 
     wrong = client.post("/api/decrypt/file", data={
         "file": (io.BytesIO(ciphertext), "sample.pdf.enc"), "password": "incorrect-password"
@@ -74,18 +82,22 @@ def test_production_secret_is_required_and_development_secret_is_ephemeral():
 def test_env_example_does_not_contain_a_secret_and_env_is_ignored():
     example = Path(".env.example").read_text(encoding="utf-8")
     assert re.search(r"(?m)^SECRET_KEY\s*=\s*$", example)
-    assert re.search(r"(?m)^SUPABASE_SERVICE_ROLE_KEY\s*=\s*$", example)
-    assert "SUPABASE_STORAGE_BUCKET=brankas-files" in example
+    env_names = {
+        line.split("=", 1)[0]
+        for line in example.splitlines()
+        if "=" in line and not line.lstrip().startswith("#")
+    }
+    assert env_names == {
+        "SECRET_KEY", "FLASK_ENV", "PBKDF2_ITERATIONS", "MAX_CONTENT_MB",
+        "PORT", "BENCHMARK_KDF_ITERATIONS", "BENCHMARK_RUNS",
+    }
     ignore = Path(".gitignore").read_text(encoding="utf-8")
     assert ".env" in ignore and ".env.*" in ignore and "!.env.example" in ignore
 
 
-def test_supabase_config_reads_environment_variable_names_without_embedded_keys():
-    source = Path("config.py").read_text(encoding="utf-8")
-    assert 'os.environ.get("SUPABASE_URL"' in source
-    assert 'os.environ.get("SUPABASE_SERVICE_ROLE_KEY"' in source
-    assert 'os.environ.get("SUPABASE_STORAGE_BUCKET"' in source
-    assert "os.environ.get(\"sb_" not in source
+def test_cloud_storage_routes_are_not_registered(client):
+    response = client.get("/api/storage/files")
+    assert response.status_code == 404
 
 
 def test_frontend_does_not_persist_password_or_put_it_in_url():

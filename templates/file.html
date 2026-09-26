@@ -281,18 +281,6 @@
     </div>
 </div>
 
-<section class="stored-files-section" id="stored-files-section" style="display:none" aria-labelledby="stored-files-title">
-    <div class="stored-files-header">
-        <div>
-            <div class="section-kicker">PRIVATE STORAGE</div>
-            <h2 id="stored-files-title">File Tersimpan</h2>
-        </div>
-        <button type="button" class="btn btn-secondary btn-sm" id="refresh-stored-files">Muat Ulang</button>
-    </div>
-    <div id="stored-files-status" class="alert" style="display:none" role="status"></div>
-    <div id="stored-files-list" class="stored-files-list"></div>
-</section>
-
 {% endblock %} {% block scripts %}
 <script src="{{ url_for('static', filename='js/file.js') }}"></script>
 {% endblock %}
