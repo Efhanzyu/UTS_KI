@@ -47,7 +47,7 @@ SUPABASE_SERVICE_ROLE_KEY=
 SUPABASE_STORAGE_BUCKET=brankas-files
 ```
 
-`SECRET_KEY` wajib diisi pada production. `SUPABASE_SERVICE_ROLE_KEY` hanya boleh berada di backend environment variable. Project ini tidak memiliki fitur hybrid RSA; karena itu `RSA_PRIVATE_KEY_PATH` tidak diperlukan.
+`SECRET_KEY` wajib diisi pada production. `SUPABASE_SERVICE_ROLE_KEY` harus berisi Supabase Secret API key (`sb_secret_...`) dan hanya boleh berada di backend environment variable. `SUPABASE_STORAGE_BUCKET` berisi nama bucket saja, yaitu `brankas-files`. Project ini tidak memiliki fitur hybrid RSA; karena itu `RSA_PRIVATE_KEY_PATH` tidak diperlukan.
 
 ## Deploy to Render
 
@@ -108,7 +108,7 @@ Jangan memasukkan nilai secret ke `vercel.json`, source code, atau repository. V
 2. Buka **Storage** dan buat bucket `brankas-files`.
 3. Set bucket sebagai **Private**, bukan public.
 4. Salin Project URL ke `SUPABASE_URL`.
-5. Salin server-side service role key ke `SUPABASE_SERVICE_ROLE_KEY` pada Vercel.
+5. Salin server-side Secret API key (`sb_secret_...`) ke `SUPABASE_SERVICE_ROLE_KEY` pada Vercel. Jangan gunakan publishable key.
 6. Set `SUPABASE_STORAGE_BUCKET=brankas-files`.
 7. Redeploy Vercel.
 

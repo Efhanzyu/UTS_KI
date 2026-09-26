@@ -50,6 +50,17 @@ class StorageService:
                 "Supabase Storage belum dikonfigurasi di environment server."
             )
 
+        api_key = self.config.SUPABASE_SERVICE_ROLE_KEY
+        bucket_name = self.config.SUPABASE_STORAGE_BUCKET
+        if api_key.startswith("sb_publishable_"):
+            raise StorageError(
+                "SUPABASE_SERVICE_ROLE_KEY harus menggunakan secret key server-side."
+            )
+        if bucket_name.startswith(("sb_secret_", "sb_publishable_")):
+            raise StorageError(
+                "SUPABASE_STORAGE_BUCKET harus berisi nama bucket, bukan API key."
+            )
+
         if self._client is None:
             try:
                 if self._client_factory is None:
@@ -57,8 +68,12 @@ class StorageService:
                     self._client_factory = create_client
                 self._client = self._client_factory(
                     self.config.SUPABASE_URL,
-                    self.config.SUPABASE_SERVICE_ROLE_KEY,
+                    api_key,
                 )
+                if api_key.startswith("sb_secret_"):
+                    headers = getattr(getattr(self._client, "options", None), "headers", None)
+                    if isinstance(headers, dict):
+                        headers.pop("Authorization", None)
             except Exception as exc:
                 raise StorageError("Supabase Storage tidak dapat diinisialisasi.") from exc
 

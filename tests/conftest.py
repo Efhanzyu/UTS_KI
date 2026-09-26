@@ -3,6 +3,8 @@ Pytest configuration and test fixtures for Brankas File Tugas Kuliah.
 """
 import pytest
 from app import create_app
+from app.routes import api as api_routes
+from app.services.storage_service import StorageService
 from config import Config
 
 
@@ -14,11 +16,15 @@ class TestConfig(Config):
     PBKDF2_ITERATIONS = 10000
     BENCHMARK_KDF_ITERATIONS = 1000
     BENCHMARK_RUNS = 2
+    SUPABASE_URL = ""
+    SUPABASE_SERVICE_ROLE_KEY = ""
+    SUPABASE_STORAGE_BUCKET = "brankas-files"
 
 
 @pytest.fixture
-def app():
+def app(monkeypatch):
     """Create and configure a testing Flask app instance."""
+    monkeypatch.setattr(api_routes, "_storage", StorageService(TestConfig))
     app_instance = create_app(TestConfig)
     return app_instance
 

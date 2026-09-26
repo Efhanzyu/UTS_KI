@@ -79,6 +79,36 @@ def test_storage_service_requires_configuration():
         service.download("users/path")
 
 
+def test_storage_service_rejects_publishable_key_for_backend():
+    class PublishableKeyConfig(StorageTestConfig):
+        SUPABASE_SERVICE_ROLE_KEY = "sb_publishable_test-key"
+
+    service = StorageService(PublishableKeyConfig, lambda url, key: pytest.fail("client must not be created"))
+    with pytest.raises(StorageError, match="secret key"):
+        service._get_bucket()
+
+
+def test_storage_service_rejects_api_key_as_bucket_name():
+    class InvalidBucketConfig(StorageTestConfig):
+        SUPABASE_STORAGE_BUCKET = "sb_secret_test-key"
+
+    service = StorageService(InvalidBucketConfig, lambda url, key: pytest.fail("client must not be created"))
+    with pytest.raises(StorageError, match="nama bucket"):
+        service._get_bucket()
+
+
+def test_secret_key_is_sent_as_api_key_not_bearer():
+    class SecretKeyConfig(StorageTestConfig):
+        SUPABASE_SERVICE_ROLE_KEY = "sb_secret_test-key"
+
+    service = StorageService(SecretKeyConfig)
+    service._get_bucket()
+
+    headers = service._client.options.headers
+    assert headers["apiKey"] == "sb_secret_test-key"
+    assert "Authorization" not in headers
+
+
 def test_storage_service_rejects_arbitrary_paths():
     with pytest.raises(StorageError):
         StorageService.build_path("../escape", "file")
