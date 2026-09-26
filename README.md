@@ -1,8 +1,28 @@
 # Brankas File Tugas Kuliah
 
-Aplikasi Flask untuk mengenkripsi dan mendekripsi teks serta file dengan AES-256-GCM atau ChaCha20-Poly1305. Password diproses melalui PBKDF2-HMAC-SHA256 dan tidak disimpan.
+Aplikasi Flask untuk mengenkripsi dan mendekripsi teks serta file dengan AES-256-GCM atau ChaCha20-Poly1305. Password diproses melalui PBKDF2-HMAC-SHA256 dan tidak disimpan di repositori atau database.
 
-## Local Development
+## Anggota Kelompok
+
+| Nama | NPM |
+|---|---|
+| [NAMA ANGGOTA 1] | [NPM ANGGOTA 1] |
+| [NAMA ANGGOTA 2] | [NPM ANGGOTA 2] |
+
+> Catatan: data nama dan NPM belum ditemukan di repository aktif. Silakan isi bagian di atas secara manual sesuai identitas kelompok yang sebenarnya sebelum presentasi atau pengumpulan final.
+
+## Fitur utama
+
+- Enkripsi teks dengan AES-256-GCM atau ChaCha20-Poly1305
+- Dekripsi teks dengan validasi tag autentikasi
+- Enkripsi file ke format container .enc
+- Dekripsi file dengan pengecekan integritas ciphertext
+- PBKDF2-HMAC-SHA256 dengan salt acak
+- Benchmark performa untuk algoritma AES dan ChaCha20
+- Analisis entropy, histogram, dan avalanche effect
+- Sample file dalam folder test_files untuk validasi roundtrip
+
+## Persiapan local
 
 Requirements: Python 3.11+.
 
@@ -13,108 +33,182 @@ python -m venv .venv
 # Linux/macOS
 source .venv/bin/activate
 pip install -r requirements-dev.txt
-python app.py
 ```
 
-Buka `http://127.0.0.1:5000`. Salin `.env.example` menjadi `.env` untuk konfigurasi lokal. Isi `SECRET_KEY` dengan nilai acak; file `.env` tidak boleh di-commit.
-
-## Production Deployment
-
-Production entry point adalah `app:app` dan server production menggunakan Gunicorn:
+Salin .env.example menjadi .env, lalu isi nilai yang dibutuhkan. File .env tidak boleh di-commit.
 
 ```bash
-gunicorn app:app
+copy .env.example .env
 ```
 
-Untuk deployment, Gunicorn menerima `PORT` dari platform dan aplikasi berjalan dengan `FLASK_ENV=production`. Jangan menjalankan Flask development server sebagai server production.
-
-Gunicorn menggunakan dependency Unix `fcntl` dan tidak dapat dijalankan native pada Windows. Gunakan `python app.py` untuk local testing di Windows; Render menjalankan Gunicorn pada environment Linux.
-
-Runtime dependencies berada di `requirements.txt`. Dependency test dan script pengembangan berada di `requirements-dev.txt`.
-
-### Environment Variables
+## Environment variables
 
 ```text
 SECRET_KEY=
-FLASK_ENV=production
-PORT=10000
-MAX_CONTENT_MB=64
+FLASK_ENV=development
 PBKDF2_ITERATIONS=600000
-BENCHMARK_KDF_ITERATIONS=1000
-BENCHMARK_RUNS=10
+MAX_CONTENT_MB=50
+
 SUPABASE_URL=
 SUPABASE_SERVICE_ROLE_KEY=
 SUPABASE_STORAGE_BUCKET=brankas-files
+
+BENCHMARK_KDF_ITERATIONS=1000
+BENCHMARK_RUNS=10
 ```
 
-`SECRET_KEY` wajib diisi pada production. `SUPABASE_SERVICE_ROLE_KEY` hanya boleh berada di backend environment variable. Project ini tidak memiliki fitur hybrid RSA; karena itu `RSA_PRIVATE_KEY_PATH` tidak diperlukan.
+`SECRET_KEY` wajib diisi saat production. `SUPABASE_SERVICE_ROLE_KEY` hanya boleh ada di server-side environment, bukan di frontend atau repositori.
 
-## Deploy to Render
+## Menjalankan aplikasi
 
-1. Push repository ke GitHub.
-2. Login ke Render.
-3. Pilih **New Web Service**.
-4. Hubungkan repository GitHub.
-5. Pilih branch `main`.
-6. Gunakan build command `pip install -r requirements.txt`.
-7. Gunakan start command `gunicorn --bind 0.0.0.0:$PORT app:app`.
-8. Set `FLASK_ENV=production` dan `SECRET_KEY` sebagai environment variable.
-9. Deploy service.
-10. Buka URL Render yang diberikan.
+```bash
+python app.py
+```
 
-File `render.yaml` menyediakan konfigurasi yang sama dan membuat `SECRET_KEY` melalui secret Render. Jangan menulis secret aktual di repository atau `render.yaml`.
+Setelah server berjalan, buka:
 
-## File Storage
+- http://127.0.0.1:5000/
+- http://127.0.0.1:5000/text
+- http://127.0.0.1:5000/file
+- http://127.0.0.1:5000/benchmark
 
-Endpoint file membaca upload ke memory dan mengirim hasil melalui response `send_file` dari `io.BytesIO`. Tidak ada upload, hasil enkripsi, atau hasil dekripsi yang disimpan sebagai file permanen. Filesystem Render bersifat ephemeral dan tidak boleh dianggap sebagai vault persisten.
+## Contoh Penggunaan
 
-Batas upload dikontrol oleh `MAX_CONTENT_MB` dan nama file dibersihkan dengan `secure_filename`. Hasil download hanya hidup selama response berlangsung.
+### A. Enkripsi file
 
-## Deployment Smoke Test
+1. Buka halaman file atau endpoint /api/encrypt/file.
+2. Pilih file yang ingin dienkripsi, misalnya laporan.pdf.
+3. Masukkan password.
+4. Sistem menghasilkan file dengan ekstensi .enc.
+5. Metadata file asli seperti nama file dan MIME type disimpan di header container dan tidak dipublikasikan dalam plaintext.
 
-- `GET /`
-- `GET /api/health`
-- Enkripsi teks lalu dekripsi teks
-- Enkripsi file lalu dekripsi file
-- Password salah ditolak
-- Ciphertext yang dimodifikasi ditolak
-- Benchmark berjalan setelah data pengujian dikirim
+Contoh body form-data untuk API:
 
-Health check mengembalikan HTTP 200 dengan pesan `Brankas API is running`.
+```text
+file: laporan.pdf
+password: SandiRahasia123!
+algorithm: AES-256-GCM
+```
 
-## Deploy to Vercel
+Hasilnya adalah file .enc yang siap diunduh untuk penyimpanan aman.
 
-Project ini menggunakan `api/index.py` sebagai serverless WSGI entry point dan `vercel.json` untuk meneruskan seluruh route ke Flask.
+### B. Dekripsi file
 
-1. Push repository ke GitHub.
-2. Login ke Vercel dan pilih **Add New Project**.
-3. Import repository `Efhanzuyu/UTS_KI` dari branch `main`.
-4. Biarkan Vercel membaca konfigurasi dari `vercel.json`.
-5. Tambahkan environment variables berikut pada Production:
-	- `FLASK_ENV=production`
-	- `SECRET_KEY=<generate a long random secret in Vercel>
-	- `MAX_CONTENT_MB=64`
-	- `PBKDF2_ITERATIONS=600000`
-	- `BENCHMARK_KDF_ITERATIONS=1000`
-	- `BENCHMARK_RUNS=10`
-6. Deploy project dan buka domain Vercel.
-7. Verifikasi `GET /api/health` mengembalikan HTTP 200.
+1. Pilih file .enc.
+2. Masukkan password yang sama saat enkripsi.
+3. Sistem melakukan derivasi key PBKDF2 lalu memverifikasi tag autentikasi.
+4. Jika berhasil, file asli dikembalikan untuk diunduh.
 
-Jangan memasukkan nilai secret ke `vercel.json`, source code, atau repository. Vercel Functions memiliki filesystem ephemeral; aplikasi ini hanya memproses upload selama request dan mengirim hasil sebagai download response.
+Contoh body form-data:
 
-## Supabase Storage Setup
+```text
+file: laporan.pdf.enc
+password: SandiRahasia123!
+```
 
-1. Buat project baru di Supabase.
-2. Buka **Storage** dan buat bucket `brankas-files`.
-3. Set bucket sebagai **Private**, bukan public.
-4. Salin Project URL ke `SUPABASE_URL`.
-5. Salin server-side service role key ke `SUPABASE_SERVICE_ROLE_KEY` pada Vercel.
-6. Set `SUPABASE_STORAGE_BUCKET=brankas-files`.
-7. Redeploy Vercel.
+### C. Password salah
 
-Service role key hanya digunakan oleh Flask backend. Browser tidak menerima key tersebut. Object dienkripsi lebih dulu sebelum diunggah ke path server-generated `users/<session-id>/<file-id>.enc`. Session ID membatasi daftar, download, decrypt, dan delete ke browser owner yang sama.
+Jika password tidak cocok, proses dekripsi akan ditolak dengan respons error generik. Tujuannya adalah mencegah adanya pengungkapan apakah kesalahan berasal dari password salah atau ciphertext yang dimodifikasi.
 
-Metadata file dibaca dari header container `.enc`; tidak ada password atau encryption key yang disimpan. Plaintext tidak pernah diunggah ke Supabase dan hasil dekripsi hanya dikirim dari memory sebagai response.
+### D. Ciphertext tampered
+
+Jika ciphertext atau metadata berubah, tag autentikasi gagal saat dekripsi. Sistem akan menolak file tersebut dan mengembalikan error yang menandakan data tidak valid.
+
+### E. Enkripsi teks
+
+Endpoint yang tersedia:
+
+```http
+POST /api/encrypt/text
+Content-Type: application/json
+```
+
+Body contoh:
+
+```json
+{
+  "plaintext": "Tugas kuliah keamanan informasi",
+  "password": "SandiRahasia123!",
+  "algorithm": "AES-256-GCM"
+}
+```
+
+Response contoh:
+
+```json
+{
+  "success": true,
+  "message": "Enkripsi berhasil.",
+  "data": {
+    "ciphertext_b64": "...",
+    "algorithm": "AES-256-GCM",
+    "kdf": "PBKDF2-HMAC-SHA256",
+    "pbkdf2_iterations": 600000,
+    "salt_size_bytes": 16,
+    "nonce_size_bytes": 12,
+    "ciphertext_size_bytes": 52
+  }
+}
+```
+
+Dekripsi teks:
+
+```http
+POST /api/decrypt/text
+Content-Type: application/json
+```
+
+```json
+{
+  "ciphertext_b64": "...",
+  "password": "SandiRahasia123!"
+}
+```
+
+Output yang dikembalikan berisi plaintext asli.
+
+## API yang tersedia
+
+Berikut endpoint utama berdasarkan source code saat ini:
+
+- GET /api/health
+- POST /api/encrypt/text
+- POST /api/decrypt/text
+- POST /api/encrypt/file
+- POST /api/decrypt/file
+- GET /api/storage/files
+- GET /api/storage/files/<file_id>
+- POST /api/storage/files/<file_id>/decrypt
+- DELETE /api/storage/files/<file_id>
+- POST /api/benchmark
+- POST /api/benchmark/export/csv
+- POST /api/benchmark/export/excel
+
+## Benchmark
+
+Aplikasi menyediakan benchmark performa untuk AES-256-GCM dan ChaCha20-Poly1305 pada ukuran yang umum:
+
+- 1 KB
+- 1 MB
+- 10 MB
+
+Script yang tersedia:
+
+```bash
+python scripts/run_benchmark.py
+```
+
+Ekspor hasil benchmark ke CSV/XLSX:
+
+```bash
+python scripts/export_results.py
+```
+
+Hasil file benchmark disimpan di folder results.
+
+## Sample files
+
+Folder test_files berisi file sampel untuk validasi roundtrip, termasuk format PDF, PNG, JPG, dokumen, dan file berukuran lebih besar.
 
 ## Testing
 
@@ -122,4 +216,17 @@ Metadata file dibaca dari header container `.enc`; tidak ada password atau encry
 python -m pytest -q
 ```
 
-Test suite mencakup algoritma AES-GCM, ChaCha20-Poly1305, PBKDF2, container, encoding, keamanan input, roundtrip file, dan acceptance regression.
+Suite pengujian mencakup keamanan, container, roundtrip, file encryption, benchmark export, dan regresi acceptance.
+
+## Security notes
+
+- Password tidak disimpan.
+- Salt dibuat acak per enkripsi.
+- Nonce dibuat acak per enkripsi.
+- Tag autentikasi diperiksa saat dekripsi.
+- Secret dan credential tidak boleh masuk ke repositori.
+- File .env harus diproteksi dan dikelola melalui environment variable server.
+
+## Deployment notes
+
+Project ini dapat dikonfigurasi untuk deployment lokal maupun platform seperti Render atau Vercel. Gunakan env var yang benar dan jangan menaruh secret asli ke file source atau file deployment config.
